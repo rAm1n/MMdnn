@@ -10,6 +10,7 @@ from tensorflow.contrib.slim.python.slim.nets import vgg
 from tensorflow.contrib.slim.python.slim.nets import inception
 from tensorflow.contrib.slim.python.slim.nets import resnet_v1
 from tensorflow.contrib.slim.python.slim.nets import resnet_v2
+from model import inception_resnet_v1, inception_resnet_v2_arg_scope
 from mmdnn.conversion.examples.imagenet_test import TestKit
 
 slim = tf.contrib.slim
@@ -25,6 +26,7 @@ input_layer_map = {
     'resnet101'     : lambda : tf.placeholder(name='input', dtype=tf.float32, shape=[None, 299, 299, 3]),
     'resnet152'     : lambda : tf.placeholder(name='input', dtype=tf.float32, shape=[None, 299, 299, 3]),
     'resnet200'     : lambda : tf.placeholder(name='input', dtype=tf.float32, shape=[None, 299, 299, 3]),
+	'inception_resnet_v1'  :  lambda : tf.placeholder(name='input', dtype=tf.float32, shape=[None, 160, 160, 3]),
 }
 
 arg_scopes_map = {
@@ -38,6 +40,8 @@ arg_scopes_map = {
     'resnet101'     : resnet_v2.resnet_arg_scope,
     'resnet152'     : resnet_v2.resnet_arg_scope,
     'resnet200'     : resnet_v2.resnet_arg_scope,
+#	'inception_resnet_v1' : inception.inception_v3_arg_scope,
+	'inception_resnet_v1' : inception_resnet_v2_arg_scope,
     # 'mobilenet_v1': mobilenet_v1.mobilenet_v1_arg_scope,
 }
 
@@ -52,6 +56,7 @@ networks_map = {
     'resnet101'     : lambda : resnet_v2.resnet_v2_101,
     'resnet152'     : lambda : resnet_v2.resnet_v2_152,
     'resnet200'     : lambda : resnet_v2.resnet_v2_200,
+	'inception_resnet_v1' : lambda : inception_resnet_v1,
     #'mobilenet_v1' : mobilenet_v1.mobilenet_v1,
 }
 
@@ -70,10 +75,11 @@ def _main():
     args = parser.parse_args()
 
     num_classes = 1000 if args.network in ('vgg16', 'vgg19', 'resnet_v1_101') else 1001
+    bottleneck_layer_size = 128 
 
     with slim.arg_scope(arg_scopes_map[args.network]()):
         data_input = input_layer_map[args.network]()
-        logits, endpoints = networks_map[args.network]()(data_input, num_classes=num_classes, is_training=False)
+        logits, endpoints = networks_map[args.network]()(data_input, is_training=False)
         labels = tf.squeeze(logits)
 
     init = tf.global_variables_initializer()
