@@ -261,7 +261,7 @@ class KitModel(nn.Module):
 
 
     def emit_Reshape(self, IR_node):
-        raise NotImplementedError
+        #raise NotImplementedError
         shape_str = IRGraph.shapeToStr(IR_node.IR_layer.attr["shape"].shape, True)
         self.add_body(1, "{:<15} = Reshape(name = \"{}\", target_shape = ({}))({})".format(
             IR_node.variable_name,
